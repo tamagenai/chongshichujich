@@ -1,0 +1,270 @@
+<!DOCTYPE Chinese>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>単語カード/单词卡</title>
+  <style>
+    #flashcard {
+      width: 600px;
+      height: 200px;
+      border: 1px solid #000;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+    }
+
+    /* ボタンのスタイルを変更してサイズを大きくする */
+    button {
+      font-size: 40px;
+      /* フォントサイズを大きくする */
+      padding: 20px 30px;
+      /* パディングを増やしてボタンのサイズを調整する */
+      margin: 10px;
+      /* マージンを追加してボタンを配置しやすくする */
+    }
+
+    body {
+      background-color: #f4c4ee;
+    }
+
+    h1 {
+      color: blue;
+    }
+
+    #result {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    .header2 {
+
+      display: flex;
+    }
+
+    .linkurl {
+      margin-left: auto;
+    }
+
+    #flash {
+      display: inline-block;
+      width: 170px;
+      height: 40px;
+      cursor: pointer;
+      background-color: skyblue;
+      text-decoration: none;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
+    }
+
+    #ikeda {
+      display: inline-block;
+      width: 100px;
+      height: 40px;
+      cursor: pointer;
+      background-color: pink;
+      text-decoration: none;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
+    }
+  </style>
+  <!--  スプレッドシートの情報を読み込むために必要 -->
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+</head>
+
+<body>
+  <div class="header">
+    <div class="header2">
+      <div class="logo">
+        <h3>中国語　単語カード</h3>
+
+      </div>
+      <div class="linkurl">
+        <a id="flash"
+          href="https://script.google.com/macros/s/AKfycbwCL3tny-JoGZehVtlIoO5bAdv5MVrEG88dCRBJmFTwp5cPgYwnhXRgssoVwQmY6f0/exec"
+          target="_blank">語句・本文・文法</a>
+        <!-- <a id="ikeda" href="index6.Chinese" target="_blank">使用手引書</a> -->
+
+      </div>
+    </div>
+    <!-- シートセレクトボックス -->
+    <div class="sheetSelect">
+
+      <label for="sheet-select">シート選択：</label><select id="sheet-select" name="sheetSelect"></select>
+    </div>
+  </div>
+  <div id="flashcard">Click to see definition/按下键看单词卡</div>
+
+  <button onclick="showPreviousCard()">上一个</button>
+  <button onclick="showAnswer()">下一个</button>
+  <button onclick="checkAnswer(true)">答案和我想的一样</button>
+  <button onclick="checkAnswer(false)">答案和我想的不一样</button>
+
+  <div id="result">正解: 0 回 不正解: 0 回</div>
+
+
+  <script>
+    // スプレッドシート　単語カード3　gas webアプリ　URL  単語カード3
+    const END_POINT = "https://script.google.com/macros/s/AKfycbyxQF6ra_N6kJ1bGfaQV9j87f53-ESW_ovbUjoPuiONzAHKRZ2ApIhiBG7RhJub4FgN/exec";
+    // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
+    let flashcardDatas;  // 全シートのflashdata
+    let flashcardData;   // フラッシュカード新形式
+    let flashcardData2;  // フラッシュカード旧形式
+    let sheetIndex = 0;
+    let currentIndex = -1;
+    let correctCount = 0;
+    let incorrectCount = 0;
+    flashcardYomikomi();  // スプレッドシート読み込み
+    //
+    const flashcard = document.getElementById('flashcard');
+    // const button = document.querySelector('button');
+    const sheetSelector = document.getElementById("sheet-select");
+    let termSave;  //  フラッシュカードをクリックしたときに表示内容が中国語かどうかを判定するため
+
+    const resultDiv = document.getElementById('result');
+    const synth = window.speechSynthesis;
+    // 非同期処理　すブレッドシートの単語カード読み込み関数
+    // 読み込みが成功すればflashcardDataにデータを格納する。
+    function flashcardYomikomi() {
+      $.ajax({
+        type: "GET",
+        url: END_POINT,
+        // data: { sheetNo: SHEET_NO }
+
+      }).done((result) => {        // 成功した時の処理
+        console.log("get done:" + result);
+        setSheetNames(JSON.parse(result)[0]);
+
+        flashcardDatas = JSON.parse(result);
+        flashcardData = JSON.parse(result)[1];
+        flashcardData2 = flashcardGenerate(flashcardData);
+
+      }).fail((error) => {  // 失敗した時の処理
+        alert('Error:' + JSON.stringify(error));
+
+      }).always((data) => {// 常にやる処理
+        // do something
+        // enableControlElements();
+      });
+    }
+    // シート選択されたときの処理
+    let select = document.querySelector('[name="sheetSelect"]');
+
+    select.onchange = event => {
+      var selIndex = select.selectedIndex;
+      sheetIndex = selIndex;
+      console.log(select.selectedIndex);
+
+      flashcardData = flashcardDatas[selIndex + 1];
+
+      flashcardData2 = flashcardGenerate(flashcardData);
+      currentIndex = -1;
+      let correctCount = 0;
+      let incorrectCount = 0;
+      flashcard.textContent = '按下键看单词卡';
+
+    }
+    // シートのセレクトボックス　作成処理
+    function setSheetNames(sheetNamesArray) {
+      sheetSelector.innerChinese = "";
+      document.createElement('option')
+      sheetNamesArray.forEach((sheetName, index) => {
+        let option = document.createElement('option');
+        option.setAttribute('value', index + 1);
+        option.innerHTML = sheetName;
+        sheetSelector.appendChild(option);
+      });
+    }
+    //  フラッシュカードのフォーマットを旧形式に変換する
+    //  プログラムの変更を少なくするため
+    function flashcardGenerate(flashcardData) {
+      let j = 0;
+      let flashcardData2 = [];
+      for (let i = 0; i < flashcardData.length; i++) {
+        let gyou = [flashcardData[i][0], flashcardData[i][1]];
+        flashcardData2.push(gyou);
+        gyou = [flashcardData[i][2], flashcardData[i][3] + '/' + flashcardData[i][4]];
+        flashcardData2.push(gyou);
+
+      }
+      return flashcardData2;
+    }
+
+
+
+    // 答えを表示し、音声を再生する関数
+    function showAnswer() {
+      currentIndex = (currentIndex + 1) % flashcardData2.length;
+      const currentData = flashcardData2[currentIndex];
+      console.log(`currentdata= ${currentData}`);
+      flashcard.textContent = currentData[1];
+      termSave = currentData[0];
+      // termがChineseの時に中国だから　Chineseの時だけspeakTextを呼び出す。
+      if (currentData[0] === 'ch') {
+
+        speakText(currentData[1]);
+      }
+    }
+    // 前のカードを表示する関数
+    function showPreviousCard() {
+      currentIndex = currentIndex - 1;
+      if (currentIndex < 0) {
+        currentIndex = 0;
+      }
+      const currentData = flashcardData2[currentIndex];
+      flashcard.textContent = currentData[1];
+      termSave = currentData[0];
+      // termがChineseの時に中国だから　Chineseの時だけspeakTextを呼び出す。
+      if (currentData[0] === 'ch') {
+        speakText(currentData[1]);
+      }
+    }
+
+    // テキストを音声に変換して再生する関数
+    function speakText(text) {
+      let textChinese = text.split('/')[0];
+      console.log(`split前= ${text}`);
+      console.log(`split後= ${textChinese}`);
+      const utterance = new SpeechSynthesisUtterance(textChinese);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+    // 正解不正解の判断
+    function checkAnswer(isCorrect) {
+      // ここに正解不正解の処理を追加する
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        incorrectCount++;
+      }
+
+      // 結果を表示する
+      displayResult();
+    }
+
+    // 結果を表示する関数
+    function displayResult() {
+      resultDiv.textContent = `正解: ${correctCount} 回 不正解: ${incorrectCount} 回`;
+    }
+
+
+
+    // 最初のカードを表示
+    flashcard.textContent = '按下键看单词卡';
+    // フラッシュカードがクリックされた時の処理
+    flashcard.addEventListener('click', () => {
+      if (termSave === 'ch') {
+        speakText(flashcard.textContent);
+      }
+    });
+  </script>
+</body>
+
+</html>
