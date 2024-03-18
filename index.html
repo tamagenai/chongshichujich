@@ -36,9 +36,48 @@
       color: blue;
     }
 
-    #result {
+
+
+    .chkboxL {
+      display: inline-block;
+      margin-top: 19px;
+      margin-left: 4px;
+    }
+
+    .showCardBlock {
+      display: block;
+    }
+
+    .showCardNone {
+      display: none;
+    }
+
+    .formDisplayNone {
+      display: none;
+    }
+
+    .formDisplayBlock {
+      display: block;
+    }
+
+    #inputHanyu {
+      display: inline-block;
+      width: 200px;
+      height: 50px;
+    }
+
+    .result {
       font-size: 20px;
       margin-top: 20px;
+      display: none;
+    }
+
+    .resultBlock {
+      display: block;
+    }
+
+    .rusultNone {
+      display: none;
     }
 
     .header2 {
@@ -73,6 +112,42 @@
       line-height: 50px;
       border-radius: 6px
     }
+
+    .totalGrade {
+      padding-left: 30px;
+
+      display: none;
+      animation: 03s fadeIn;
+    }
+
+    .totalGradeDisplay {
+      display: block;
+    }
+
+    .totalGradeNoDisplay {
+      display: none;
+    }
+    #totalSeitouritsu {
+      font-size: 24px;
+    }
+    #totalComment {
+      font-size: 24px;
+      color: red;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+
+      }
+
+      100% {
+        opacity: 1;
+        transform: none;
+      }
+
+    }
   </style>
   <!--  スプレッドシートの情報を読み込むために必要 -->
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -84,6 +159,11 @@
     <div class="header2">
       <div class="logo">
         <h3>中国語　単語カード</h3>
+
+
+      </div>
+      <div>
+        <label class="chkboxL"><input id="chkbox" type="checkbox">ピンイン入力</label>
 
       </div>
       <div class="linkurl">
@@ -101,14 +181,22 @@
     </div>
   </div>
   <div id="flashcard">Click to see definition/按下键看单词卡</div>
+  <div class="showCard showCardBlock">
+    <button onclick="showPreviousCard()">上一个</button>
+    <button onclick="showAnswer()">下一个</button>
 
-  <button onclick="showPreviousCard()">上一个</button>
-  <button onclick="showAnswer()">下一个</button>
-  <button onclick="checkAnswer(true)">答案和我想的一样</button>
-  <button onclick="checkAnswer(false)">答案和我想的不一样</button>
+  </div>
+  <form class="formDisplay formDisplayNone">
+    <input id="inputHanyu" type="text">
+    <button id="chkInput">チェック</button>
+    <p id="comment"></p>
+  </form>
+  <div id="resultID" class="result resultNone">正解: 0 回 不正解: 0 回</div>
+  <div class="totalGrade totalGradeNoDisplay">
+    <p id="totalSeitouritsu"></p>
+    <p id="totalComment"></p>
 
-  <div id="result">正解: 0 回 不正解: 0 回</div>
-
+  </div>
 
   <script>
     // スプレッドシート　単語カード3　gas webアプリ　URL  単語カード3
@@ -121,14 +209,17 @@
     let currentIndex = -1;
     let correctCount = 0;
     let incorrectCount = 0;
-    flashcardYomikomi();  // スプレッドシート読み込み
-    //
+    let isPinyin = false;
+    let isKanjiCheck = false;
+    let textChinese;  // 　ピンイン削除後の中国語を記憶
+
     const flashcard = document.getElementById('flashcard');
     // const button = document.querySelector('button');
     const sheetSelector = document.getElementById("sheet-select");
     let termSave;  //  フラッシュカードをクリックしたときに表示内容が中国語かどうかを判定するため
 
-    const resultDiv = document.getElementById('result');
+
+
     const synth = window.speechSynthesis;
     // 非同期処理　すブレッドシートの単語カード読み込み関数
     // 読み込みが成功すればflashcardDataにデータを格納する。
@@ -154,6 +245,74 @@
         // enableControlElements();
       });
     }
+    flashcardYomikomi();  // スプレッドシート読み込み
+    const resultDiv = document.getElementById('resultID');
+    // 2024-03-12
+    const chkbox = document.getElementById('chkbox');
+    // const pinyinInput = document.getElementById('pinyinInput');
+    const formDisplay = document.querySelector('.formDisplay');
+    const inputHanyu = document.getElementById('inputHanyu');
+    const chkInput = document.getElementById('chkInput');
+    const showCard = document.querySelector('.showCard');
+    let comment = document.getElementById('comment');
+    const totalGrade = document.querySelector('.totalGrade');
+    chkbox.addEventListener('change', () => {
+      if (chkbox.checked) {
+        isPinyin = true;
+        inputHanyu.value = '';
+        isKanjiCheck = false;
+        comment.textContent = '';
+      } else {
+        isPinyin = false;
+        formDisplay.classList.add('formDisplayNone');
+        formDisplay.classList.remove('formDisplayBlock');
+        showCard.classList.add('showCardBlock');
+        showCard.classList.remove('showCardNone');
+      }
+      chkboxChenged();
+
+    });
+    chkInput.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isKanjiCheck) {
+        isKanjiCheck = false;
+        chkInput.textContent = 'チェック';
+        formDisplay.classList.add('formDisplayNone');
+        formDisplay.classList.remove('formDisplayBlock');
+        showCard.classList.add('showCardBlock');
+        showCard.classList.remove('showCardNone');
+        showAnswer();
+        inputHanyu.value = '';
+        inputHanyu.focus();
+        comment.textContent = '';
+      } else {
+
+
+        showAnswer();
+        chkInput.textContent = '下一个';
+        isKanjiCheck = true;
+        // showCard.classList.add('showCardBlock');
+        // showCard.classList.remove('showCardNone');
+        console.log(inputHanyu.value);
+        console.log(`flash= ${flashcardData2[currentIndex]}`);
+        console.log(`textChinese=${textChinese}`);
+        if (textChinese === inputHanyu.value) {
+          comment.textContent = '好！赞👍';
+          speakText2(comment.textContent);
+          console.log('seikai')
+          correctCount++;
+        } else {
+          comment.textContent = '错×　再加油！！';
+          speakText2(comment.textContent);
+          console.log('fuseikai');
+          incorrectCount++;
+        }
+
+
+        displayResult();
+      }
+    });
+    // 2024/03/12
     // シート選択されたときの処理
     let select = document.querySelector('[name="sheetSelect"]');
 
@@ -166,9 +325,12 @@
 
       flashcardData2 = flashcardGenerate(flashcardData);
       currentIndex = -1;
-      let correctCount = 0;
-      let incorrectCount = 0;
+      correctCount = 0;
+      incorrectCount = 0;
+      displayResult();
       flashcard.textContent = '按下键看单词卡';
+      totalGrade.classList.remove('totalGradeDisplay');
+      totalGrade.classList.add('totalGradeNoDisplay');
 
     }
     // シートのセレクトボックス　作成処理
@@ -188,20 +350,71 @@
       let j = 0;
       let flashcardData2 = [];
       for (let i = 0; i < flashcardData.length; i++) {
-        let gyou = [flashcardData[i][0], flashcardData[i][1]];
+        let gyou = ['jp', flashcardData[i][0] + '.' + flashcardData[i][1]];
         flashcardData2.push(gyou);
-        gyou = [flashcardData[i][2], flashcardData[i][3] + '/' + flashcardData[i][4]];
+        gyou = ['ch', flashcardData[i][2] + '/' + flashcardData[i][3]];
         flashcardData2.push(gyou);
 
       }
       return flashcardData2;
+    }
+    // ピンイン入力のチェックボックスが変化した時
+    function chkboxChenged() {
+      currentIndex = -1;
+      correctCount = 0;
+      incorrectCount = 0;
+      totalGrade.classList.remove('totalGradeDisplay');
+      totalGrade.classList.add('totalGradeNoDisplay');
+      flashcard.textContent = '按下键看单词卡';
+      showCard.classList.add('showCardBlock');
+      showCard.classList.remove('showCardNone');
+      let result = document.querySelector('.result');
+      if (isPinyin) {
+        result.classList.add('resultBlock');
+        result.classList.remove('resultNone');
+        displayResult();
+      } else {
+        result.classList.remove('resultBlock');
+        result.classList.add('resultNone');
+
+      }
+
     }
 
 
 
     // 答えを表示し、音声を再生する関数
     function showAnswer() {
-      currentIndex = (currentIndex + 1) % flashcardData2.length;
+
+      currentIndex++;
+      if (currentIndex === flashcardData2.length) {
+        if (isPinyin) {
+          totalGrade.classList.add('totalGradeDisplay');
+          totalGrade.classList.remove('totalGradeNoDisplay');
+          let totalSeitouritsu = document.getElementById('totalSeitouritsu');
+          let totalComment = document.getElementById('totalComment');
+          let mondaisu = flashcardData2.length / 2;
+          let ritsu = correctCount * 100 / mondaisu;
+          totalSeitouritsu.textContent = `正答数は${correctCount}, 正答率は${ritsu.toFixed(1)}でした。`;
+          if (correctCount === mondaisu) {
+
+            totalComment.textContent = '恭喜恭喜!!';
+            
+            speakText2('恭喜恭喜!!');
+          } else {
+            totalComment.textContent = '';
+
+          }
+          return;
+
+
+
+        }
+      }
+      if (currentIndex === flashcardData2.length) {
+        currentIndex = 0;
+      }
+
       const currentData = flashcardData2[currentIndex];
       console.log(`currentdata= ${currentData}`);
       flashcard.textContent = currentData[1];
@@ -211,7 +424,19 @@
 
         speakText(currentData[1]);
       }
+      //
+      if (currentData[0] === 'jp') {
+        if (isPinyin) {
+          formDisplay.classList.add('formDisplayBlock');
+          formDisplay.classList.remove('formDisplayNone');
+          showCard.classList.add('showCardNone');
+          showCard.classList.remove('showCardBlock');
+
+        }
+      }
+
     }
+    
     // 前のカードを表示する関数
     function showPreviousCard() {
       currentIndex = currentIndex - 1;
@@ -229,10 +454,17 @@
 
     // テキストを音声に変換して再生する関数
     function speakText(text) {
-      let textChinese = text.split('/')[0];
+      textChinese = text.split('/')[0];
       console.log(`split前= ${text}`);
       console.log(`split後= ${textChinese}`);
       const utterance = new SpeechSynthesisUtterance(textChinese);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+    // テキストを音声に変換して再生する関数
+    function speakText2(text) {
+
+      const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'zh-CN'; // 中国語の言語コード
       synth.speak(utterance);
     }
