@@ -91,8 +91,8 @@
 
     #flash {
       display: inline-block;
-      width: 170px;
-      height: 40px;
+      width: 200px;
+      height: 50px;
       cursor: pointer;
       background-color: skyblue;
       text-decoration: none;
@@ -180,7 +180,7 @@
       <label for="sheet-select">シート選択：</label><select id="sheet-select" name="sheetSelect"></select>
     </div>
   </div>
-  <div id="flashcard">Click to see definition/按下键看单词卡</div>
+  <div id="flashcard">Click to see definition/[下一个](次へ)を押して単語を見る</div>
   <div class="showCard showCardBlock">
     <button onclick="showPreviousCard()">上一个</button>
     <button onclick="showAnswer()">下一个</button>
@@ -328,7 +328,7 @@
       correctCount = 0;
       incorrectCount = 0;
       displayResult();
-      flashcard.textContent = '按下键看单词卡';
+      flashcard.textContent = '[下一个](次へ)を押して単語を見る';
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
 
@@ -365,7 +365,7 @@
       incorrectCount = 0;
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
-      flashcard.textContent = '按下键看单词卡';
+      flashcard.textContent = '[下一个](次へ)を押して単語を見る';
       showCard.classList.add('showCardBlock');
       showCard.classList.remove('showCardNone');
       let result = document.querySelector('.result');
@@ -489,7 +489,7 @@
 
 
     // 最初のカードを表示
-    flashcard.textContent = '按下键看单词卡';
+    flashcard.textContent = '[下一个](次へ)を押して単語を見る';
     // フラッシュカードがクリックされた時の処理
     flashcard.addEventListener('click', () => {
       if (termSave === 'ch') {
