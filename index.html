@@ -5,14 +5,35 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>単語カード/单词卡</title>
+  <title>充実初級単語カード</title>
   <style>
+    .header {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      z-index: 10;
+      background-color: #f4c4ee;
+      width: 100%;
+
+
+    }
+
+    .divTangoCardDisplay {
+      display: block;
+    }
+
+    .divTangoCardNoDisplay {
+      display: none;
+    }
+
     #flashcard {
+      margin-top: 120px;
       width: 340px;
       height: 200px;
       border: 1px solid #000;
       text-align: center;
-      display: flex;
+      /* line-height: 200px; */
+      display: flex; 
       justify-content: center;
       align-items: center;
       font-size: 20px;
@@ -91,7 +112,7 @@
 
     #flash {
       display: inline-block;
-      width: 170px;
+      width: 70px;
       height: 40px;
       cursor: pointer;
       background-color: skyblue;
@@ -100,20 +121,55 @@
       line-height: 50px;
       border-radius: 6px
     }
-    #aDiv {
-      cursor: pointer;
-      width: 100px;
+
+    #ikeda {
+      display: inline-block;
+      width: 70px;
       height: 40px;
+      cursor: pointer;
       background-color: pink;
-      text-align: center;
-      line-height: 40px;
-      border-radius: 10px;
-    }
-    #pdf-link {
       text-decoration: none;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
     }
 
-    
+    #btnKensaku {
+      display: none;
+    }
+
+    #resultKensaku {
+      position: relative;
+      top: 100px;
+      left: 0px;
+      z-index: 1;
+      width: auto;
+
+      /* padding-top: 12px; */
+      background-color: white;
+
+    }
+
+    .resultKensakuDisplay {
+      display: block;
+    }
+
+    .resultKensakuNoDisplay {
+      display: none;
+
+    }
+
+    #resultKensakuClear {
+      margin: 10px 10px;
+      width: 100px;
+      height: 50px;
+      cursor: pointer;
+      background-color: skyblue;
+
+      text-align: center;
+      line-height: 50px;
+      border-radius: 6px
+    }
 
     .imgDivDisplay {
       display: block;
@@ -122,6 +178,10 @@
 
     .imgDivNoDisplay {
       display: none;
+    }
+    .classImageSize {
+      width: 100;
+      height: 100;
     }
 
     #inputHanyu {
@@ -160,6 +220,9 @@
     #questionNo {
       margin-left: 30px;
     }
+    #kensaku{
+      margin-left: 10px;
+    }
 
     .totalGrade {
       padding-left: 30px;
@@ -183,6 +246,10 @@
     #totalComment {
       font-size: 24px;
       color: red;
+    }
+    .clkBtn {
+      cursor: pointer;
+      user-select: none;
     }
 
     @keyframes fadeIn {
@@ -211,7 +278,7 @@
   <div class="header">
     <div class="header2">
       <div class="logo">
-        <h3>中国語　単語カード</h3>
+        <h3>単語カード</h3>
 
 
       </div>
@@ -221,58 +288,75 @@
       </div>
       <div class="linkurl">
         <a id="flash"
-          href="https://script.google.com/macros/s/AKfycbwCL3tny-JoGZehVtlIoO5bAdv5MVrEG88dCRBJmFTwp5cPgYwnhXRgssoVwQmY6f0/exec"
-          target="_blank">語句・本文・文法</a>
+        href="https://script.google.com/macros/s/AKfycbwCL3tny-JoGZehVtlIoO5bAdv5MVrEG88dCRBJmFTwp5cPgYwnhXRgssoVwQmY6f0/exec"
+        target="_blank">本文</a>
+
         <!-- <a id="ikeda" href="index6.Chinese" target="_blank">使用手引書</a> -->
+        <a id="ikeda" href="https://drive.google.com/file/d/1xExBsjozNSCnDzwf80Gl3rN_VejIsiju/view?usp=sharing" target="_blank">Help</a>
 
       </div>
-      <div id="aDiv">
-        <a href="https://drive.google.com/file/d/1xExBsjozNSCnDzwf80Gl3rN_VejIsiju/view?usp=sharing" id="pdf-link" target="_blank">Help</a>
-    
-      </div>
-
     </div>
     <div id="header3">
       <!-- シートセレクトボックス -->
       <div class="sheetSelect">
 
-        <label for="sheet-select">シート選択：</label><select id="sheet-select" name="sheetSelect"></select>
+        <label for="sheet-select">選択：</label><select id="sheet-select" name="sheetSelect"></select>
       </div>
       <div id="questionNo"></div>
+      <div id="kensaku">
+        <form>
+          <input type="text" id="myInput" placeholder="検索したい言葉を入力してください。">
+          <button id="btnKensaku">検索</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- hajime -->
+  <div id="divTangoCard" class="divTangoCardDisplay">
+
+
+    <div id="flashcard">Click to see definition/按下键看单词卡</div>
+    <div id="etcInfo">
+      <div id="imgDiv" class="imgDivNoDisplay">
+        <a id="aGazou" target="_blank"><img id="imgGazou" width="100" height="100"></a>
+
+      </div>
+      <div id="Internet" class="internetNodisplay">
+        <a id="infoInternet">参考サイト</a>
+
+      </div>
+    </div>
+    <div class="showCard showCardBlock">
+      <button onclick="showPreviousCard()">上一个</button>
+      <button onclick="showAnswer()">下一个</button>
+
+    </div>
+    <form class="formDisplay formDisplayNone">
+      <input id="inputHanyu" type="text">
+      <button id="chkInput">チェック</button>
+      <p id="comment"></p>
+    </form>
+    <div id="resultID" class="result resultNone">正解: 0 回 不正解: 0 回</div>
+    <div class="totalGrade totalGradeNoDisplay">
+      <p id="totalSeitouritsu"></p>
+      <p id="totalComment"></p>
 
     </div>
   </div>
-  <div id="flashcard">Click to see definition/[下一个](次へ)を押して単語を見る</div>
-  <div id="etcInfo">
-    <div id="imgDiv" class="imgDivNoDisplay">
-      <a id="aGazou" target="_blank"><img id="imgGazou" width="100" height="100"></a>
+  <!-- owari -->
+  <div id="resultKensaku" class="resultKensakuNoDisplay">
+    <!-- <div id="resultKensakuContent"> -->
 
-    </div>
-    <div id="Internet" class="internetNodisplay">
-      <a id="infoInternet">参考サイト</a>
 
-    </div>
+   
   </div>
-  <div class="showCard showCardBlock">
-    <button onclick="showPreviousCard()">上一个</button>
-    <button onclick="showAnswer()">下一个</button>
 
-  </div>
-  <form class="formDisplay formDisplayNone">
-    <input id="inputHanyu" type="text">
-    <button id="chkInput">チェック</button>
-    <p id="comment"></p>
-  </form>
-  <div id="resultID" class="result resultNone">正解: 0 回 不正解: 0 回</div>
-  <div class="totalGrade totalGradeNoDisplay">
-    <p id="totalSeitouritsu"></p>
-    <p id="totalComment"></p>
-
-  </div>
 
   <script>
     // スプレッドシート　単語カード3　gas webアプリ　URL  単語カード3
     const END_POINT = "https://script.google.com/macros/s/AKfycbyxQF6ra_N6kJ1bGfaQV9j87f53-ESW_ovbUjoPuiONzAHKRZ2ApIhiBG7RhJub4FgN/exec";
+
+
     // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
     let flashcardDatas;  // 全シートのflashdata
     let flashcardData;   // フラッシュカード新形式
@@ -284,6 +368,7 @@
     let isPinyin = false;
     let isKanjiCheck = false;
     let textChinese;  // 　ピンイン削除後の中国語を記憶
+
 
     const flashcard = document.getElementById('flashcard');
     // const button = document.querySelector('button');
@@ -333,6 +418,11 @@
     const imgGazou = document.getElementById('imgGazou');
     const questionNo = document.getElementById('questionNo');
     let Internet = document.getElementById('Internet');
+    const resultKensaku = document.getElementById('resultKensaku');
+    let resultKensakuContent = document.getElementById('resultKensakuContent');
+    let resultKensakuClear = document.getElementById('resultKensakuClear');
+    const myInput = document.getElementById('myInput');
+    const divTangoCard = document.getElementById('divTangoCard');
     // チェックボックスが変更されたとき
     chkbox.addEventListener('change', () => {
       if (chkbox.checked) {
@@ -411,12 +501,12 @@
       questionNo.textContent = '';
       fncFormDisplayNone();
       fncImageNoDisplay();
-      
+
       displayResult();
-      flashcard.textContent = '[下一个](次へ)を押して単語を見る';
+      flashcard.textContent = '按下键看单词卡';
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
-      
+
     }
     // シートのセレクトボックス　作成処理
     function setSheetNames(sheetNamesArray) {
@@ -451,7 +541,7 @@
       questionNo.textContent = '';
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
-      flashcard.textContent = '[下一个](次へ)を押して単語を見る';
+      flashcard.textContent = '按下键看单词卡';
       showCard.classList.add('showCardBlock');
       showCard.classList.remove('showCardNone');
       let result = document.querySelector('.result');
@@ -465,7 +555,7 @@
 
       }
       fncImageNoDisplay();
-      
+
     }
     function fncImageNoDisplay() {
       imgDiv.classList.add('imgDivNoDisplay');
@@ -623,13 +713,134 @@
 
 
     // 最初のカードを表示
-    flashcard.textContent = '[下一个](次へ)を押して単語を見る';
+    flashcard.textContent = '按下键看单词卡';
     // フラッシュカードがクリックされた時の処理
     flashcard.addEventListener('click', () => {
       if (termSave === 'ch') {
         speakText(flashcard.textContent);
       }
     });
+    //
+    const btnKensaku = document.getElementById('btnKensaku');
+    btnKensaku.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (resultKensaku.contains(resultKensakuContent)) {
+        resultKensakuContent.remove();
+
+      }
+      divTangoCard.classList.add('divTangoCardNoDisplay');
+      divTangoCard.classList.remove('divTangoCardDisplay');
+      resultKensakuContent = document.createElement('div');
+      resultKensakuContent.setAttribute('id', 'resultKensakuContent');
+      resultKensaku.appendChild(resultKensakuContent);
+      resultKensaku.classList.remove('resultKensakuNoDisplay');
+      resultKensaku.classList.add('resultKensakuDisplay');
+      var input, filter, i, txtValue, div, table, tbody, tr, td;
+      input = document.getElementById('myInput');
+      filter = input.value;
+
+
+      table = document.createElement('table');
+      table.setAttribute('border', '1');
+      resultKensakuContent.appendChild(table);
+      tbody = document.createElement('tbody');
+      table.appendChild(tbody);
+      let isFind = false;
+      for (i = 1; i < flashcardDatas.length; i++) {
+        for (let j = 0; j < flashcardDatas[i].length; j++) {
+          let sheetName = flashcardDatas[0][i - 1];
+          if (sheetName.indexOf(filter) > -1 || flashcardDatas[i][j][1].indexOf(filter) > -1 || flashcardDatas[i][j][2].indexOf(filter) > -1  || filter === 'all') {
+            console.log(flashcardDatas[i][j]);
+            isFind = true;
+
+            //
+
+            tr = document.createElement('tr');
+            td = document.createElement('td');
+            // td.textContent = flashcardDatas[0][i - 1];
+            td.textContent = sheetName;
+            tr.appendChild(td);
+
+
+            td = document.createElement('td');
+            td.textContent = flashcardDatas[i][j][1];
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = flashcardDatas[i][j][2];
+            td.setAttribute('onclick', `speakText2('${td.textContent}')`);
+            td.setAttribute('class', 'clkBtn');
+
+
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.textContent = flashcardDatas[i][j][3];
+            tr.appendChild(td);
+            //  internet
+            if (flashcardDatas[i][j][5] !== '') {
+              td = document.createElement('td');
+              let atag = document.createElement('a');
+  
+              let gazouURL0 = flashcardDatas[i][j][5];
+              atag.setAttribute('href', gazouURL0);
+              atag.setAttribute('class', 'classGazou');
+              atag.setAttribute('target', '_blank');
+              atag.textContent = '参考サイト'
+              td.appendChild(atag);
+              tr.appendChild(td);
+            }
+            //  画像
+            if (flashcardDatas[i][j][4] !== '') {
+              td = document.createElement('td');
+              let atag = document.createElement('a');
+  
+              let gazouURL0 = flashcardDatas[i][j][4];
+              atag.setAttribute('href', gazouURL0);
+              atag.setAttribute('class', 'classGazou');
+              atag.setAttribute('target', '_blank');
+             
+              td.appendChild(atag);
+              tr.appendChild(td);
+              let img = document.createElement('img');
+  
+  
+              img.setAttribute('src', gazouURL0);
+              img.setAttribute('class', 'classGazou classImageSize');
+              atag.appendChild(img);
+              td.appendChild(atag);
+              tr.appendChild(td);
+            }
+
+            
+
+
+          } else {
+            isFind = false;
+          }
+          if (isFind) {
+
+            tbody.appendChild(tr);
+          }
+
+        }
+      }
+      resultKensakuClear = document.createElement('div');
+      resultKensakuClear.setAttribute('id', 'resultKensakuClear');
+      resultKensakuClear.textContent = '戻る';
+      resultKensakuClear.setAttribute('onclick', 'fncresultKensakuClear()');
+      resultKensakuContent.appendChild(resultKensakuClear);
+    });
+    //
+    function fncresultKensakuClear() {
+      divTangoCard.classList.remove('divTangoCardNoDisplay');
+      divTangoCard.classList.add('divTangoCardDisplay');
+      resultKensakuContent.remove();
+      myInput.value = '';
+      resultKensaku.classList.add('resultKensakuNoDisplay');
+      resultKensaku.classList.remove('resultKensakuDisplay');
+    }
+
+
   </script>
 </body>
 
