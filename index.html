@@ -250,6 +250,7 @@
     .clkBtn {
       cursor: pointer;
       user-select: none;
+      background-color: #fffacd;
     }
 
     @keyframes fadeIn {
@@ -368,6 +369,8 @@
     let isPinyin = false;
     let isKanjiCheck = false;
     let textChinese;  // 　ピンイン削除後の中国語を記憶
+    let tdOLD;
+    let tdOLDColor;  
 
 
     const flashcard = document.getElementById('flashcard');
@@ -686,9 +689,20 @@
       synth.speak(utterance);
     }
     // テキストを音声に変換して再生する関数
-    function speakText2(text) {
+    function speakText2(param1) {
+      const td = param1;
+       //2023/04/27 追加　背景色
+       if (tdOLD === undefined){
+          tdOLD = param1;
+          tdOLDColor = tdOLD.style.backgroundColor;
+        } else {
+          tdOLD.style.backgroundColor = tdOLDColor;
+          tdOLD = param1;
+        }
+        //2023/04/27 追加　背景色
+        td.style.backgroundColor = 'cyan';
 
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(td.textContent);
       utterance.lang = 'zh-CN'; // 中国語の言語コード
       synth.speak(utterance);
     }
@@ -768,7 +782,7 @@
 
             td = document.createElement('td');
             td.textContent = flashcardDatas[i][j][2];
-            td.setAttribute('onclick', `speakText2('${td.textContent}')`);
+            td.setAttribute('onclick', 'speakText2(this)');
             td.setAttribute('class', 'clkBtn');
 
 
