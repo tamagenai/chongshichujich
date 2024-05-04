@@ -689,7 +689,14 @@
       synth.speak(utterance);
     }
     // テキストを音声に変換して再生する関数
-    function speakText2(param1) {
+    function speakText2(text) {
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN'; // 中国語の言語コード
+      synth.speak(utterance);
+    }
+    // テキストを音声に変換して再生する関数
+    function speakText3(param1) {
       const td = param1;
        //2023/04/27 追加　背景色
        if (tdOLD === undefined){
@@ -782,7 +789,7 @@
 
             td = document.createElement('td');
             td.textContent = flashcardDatas[i][j][2];
-            td.setAttribute('onclick', 'speakText2(this)');
+            td.setAttribute('onclick', 'speakText3(this)');
             td.setAttribute('class', 'clkBtn');
 
 
