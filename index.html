@@ -316,7 +316,7 @@
   <div id="divTangoCard" class="divTangoCardDisplay">
 
 
-    <div id="flashcard">Click to see definition/按下键看单词卡</div>
+    <div id="flashcard">Click to see definition/👉按「下一个」（次へ）🐼看单词卡</div>
     <div id="etcInfo">
       <div id="imgDiv" class="imgDivNoDisplay">
         <a id="aGazou" target="_blank"><img id="imgGazou" width="100" height="100"></a>
@@ -471,7 +471,7 @@
         console.log(`flash= ${flashcardData2[currentIndex]}`);
         console.log(`textChinese=${textChinese}`);
         if (textChinese === inputHanyu.value) {
-          comment.textContent = '好！赞👍';
+          comment.textContent = '好！赞👍🐼';
           speakText2(comment.textContent);
           console.log('seikai')
           correctCount++;
@@ -506,7 +506,7 @@
       fncImageNoDisplay();
 
       displayResult();
-      flashcard.textContent = '按下键看单词卡';
+      flashcard.textContent = '👉按「下一个」（次へ）🐼看单词卡';
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
 
@@ -544,7 +544,7 @@
       questionNo.textContent = '';
       totalGrade.classList.remove('totalGradeDisplay');
       totalGrade.classList.add('totalGradeNoDisplay');
-      flashcard.textContent = '按下键看单词卡';
+      flashcard.textContent = '👉按「下一个」（次へ）🐼看单词卡';
       showCard.classList.add('showCardBlock');
       showCard.classList.remove('showCardNone');
       let result = document.querySelector('.result');
@@ -734,7 +734,7 @@
 
 
     // 最初のカードを表示
-    flashcard.textContent = '按下键看单词卡';
+    flashcard.textContent = '👉按「下一个」（次へ）🐼看单词卡';
     // フラッシュカードがクリックされた時の処理
     flashcard.addEventListener('click', () => {
       if (termSave === 'ch') {
