@@ -102,10 +102,25 @@
     }
 
     .header2 {
-
+      
       display: flex;
     }
-
+    .logo {
+      display: flex;
+    }
+    .logo p {
+      margin: 0px;
+    }
+    #timer {
+      display: inline-block;
+      background: pink;
+      width: 70px;
+      height: 40px;
+      font-size: 16px;
+    }
+    .logo #timer {
+      margin-left: 5px;
+    }
     .linkurl {
       margin-left: auto;
     }
@@ -309,7 +324,7 @@
     <div class="header2">
       <div class="logo">
         <h3>単語カード</h3>
-
+        <!-- <p>単語カード　<button id="timer">計測</button></p> -->
 
       </div>
       <div>
@@ -386,7 +401,13 @@
     // スプレッドシート　単語カード3　gas webアプリ　URL  単語カード3
     const END_POINT = "https://script.google.com/macros/s/AKfycbyxQF6ra_N6kJ1bGfaQV9j87f53-ESW_ovbUjoPuiONzAHKRZ2ApIhiBG7RhJub4FgN/exec";
 
-
+    // ios 中国語音声不具合の訂正
+    // 2024/12-09
+    let voices = [];
+    // 初期音声リストの取得
+    voices = speechSynthesis.getVoices();
+    // 音声リストが取得できない場合は、音声リストが取得できるようになるまで待機
+    // 2024/12-09
     // スプレッドシート　単語カードを読み込んで配列　flashcardDataにセット
     let flashcardDatas;  // 全シートのflashdata
     let flashcardData;   // フラッシュカード新形式
@@ -401,7 +422,8 @@
     let tdOLD;
     let tdOLDColor;  
     let kurukuru = document.getElementById('kurukuru');
-
+    let startTime;
+    let endTime;
     const flashcard = document.getElementById('flashcard');
     // const button = document.querySelector('button');
     const sheetSelector = document.getElementById("sheet-select");
@@ -436,6 +458,9 @@
       });
     }
     flashcardYomikomi();  // スプレッドシート読み込み
+    //
+   
+    
     const resultDiv = document.getElementById('resultID');
     // 2024-03-12
     const chkbox = document.getElementById('chkbox');
@@ -463,6 +488,10 @@
         inputHanyu.value = '';
         isKanjiCheck = false;
         comment.textContent = '';
+        
+        startTime = Date.now(); // 開始時間
+      
+   
       } else {
         isPinyin = false;
         fncFormDisplayNone();
@@ -622,6 +651,24 @@
             totalComment.textContent = '';
 
           }
+          //
+          if (startTime > 0) {
+            endTime = Date.now(); // 終了時間
+            let syoriTime = endTime - startTime;
+            console.log(syoriTime);
+            let syoriMinute = Math.floor(syoriTime / 60000);
+            if (syoriMinute < 1) {
+              syoriMinute = 0;
+            }
+            let syoriSecond = syoriTime % 60000;
+            syoriSecond = syoriSecond / 1000;
+
+            div = document.createElement('div');
+            div.textContent = `処理時間は${syoriMinute}分${syoriSecond.toFixed(1)}秒でした。`;
+            totalGrade.appendChild(div);
+
+          }
+
           return;
 
 
@@ -716,6 +763,17 @@
       console.log(`split後= ${textChinese}`);
       const utterance = new SpeechSynthesisUtterance(textChinese);
       utterance.lang = 'zh-CN'; // 中国語の言語コード
+      // ios 中国語音声不具合の訂正
+      // 利用可能な音声を確認
+      const voices = speechSynthesis.getVoices();
+      const chineseVoice = getChineseVoice();
+
+      if (chineseVoice) {
+        utterance.voice = chineseVoice;
+      } else {
+        console.warn('Chinese voice not found, using default voice.');
+      }
+      // ios 中国語音声不具合の訂正
       synth.speak(utterance);
     }
     // テキストを音声に変換して再生する関数
@@ -723,6 +781,17 @@
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'zh-CN'; // 中国語の言語コード
+      // ios 中国語音声不具合の訂正
+      // 利用可能な音声を確認
+      const voices = speechSynthesis.getVoices();
+      const chineseVoice = getChineseVoice();
+
+      if (chineseVoice) {
+        utterance.voice = chineseVoice;
+      } else {
+        console.warn('Chinese voice not found, using default voice.');
+      }
+      // ios 中国語音声不具合の訂正
       synth.speak(utterance);
     }
     // テキストを音声に変換して再生する関数
@@ -741,8 +810,32 @@
 
       const utterance = new SpeechSynthesisUtterance(td.textContent);
       utterance.lang = 'zh-CN'; // 中国語の言語コード
+      // ios 中国語音声不具合の訂正
+      // 利用可能な音声を確認
+      const voices = speechSynthesis.getVoices();
+      const chineseVoice = getChineseVoice();
+
+      if (chineseVoice) {
+        utterance.voice = chineseVoice;
+      } else {
+        console.warn('Chinese voice not found, using default voice.');
+      }
+      // ios 中国語音声不具合の訂正
       synth.speak(utterance);
     }
+    // ios 中国語音声不具合の訂正 2024-12-09
+    function getChineseVoice() {
+      if (voices.length === 0) {
+        voices = speechSynthesis.getVoices();
+      }
+      return voices.find(voice => voice.lang === 'zh-CN');
+    }
+
+    // 音声リストが更新されたときに再取得
+    speechSynthesis.onvoiceschanged = function () {
+      voices = speechSynthesis.getVoices();
+    };
+    // ios 中国語音声不具合の訂正 2024-12-09
     // 正解不正解の判断
     function checkAnswer(isCorrect) {
       // ここに正解不正解の処理を追加する
